@@ -47,10 +47,9 @@ More details about the rules, the exact APIs checked, as well as suggested code 
 
 ## Contributing
 
-The SonarQube-Plugin-for-Java project team welcomes contributions from the community. Before you start working with SonarQube-Plugin-for-Java, please
-read our [Contributor License Agreement](https://cla.vmware.com/cla/1/preview). All contributions to this repository must be
-signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on
-as an open-source patch. For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
+The SonarQube-Plugin-for-Java project team welcomes contributions from the community. If you wish to contribute code and you have not signed
+our [contributor license agreement](https://cla.vmware.com/cla/1/preview), our bot will update the issue when you open a Pull Request. For any questions about
+the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq). For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
 
 * The [github issues](https://github.com/vmware-samples/SonarQube-Plugin-for-Java/issues) in the repository are for bug reports and feature requests.
 
