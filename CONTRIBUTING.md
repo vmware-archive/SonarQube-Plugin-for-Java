@@ -1,7 +1,7 @@
 # Contributing to SonarQube-Plugin-for-Java
 
 The SonarQube-Plugin-for-Java project team welcomes contributions from the community. Before you start working with SonarQube-Plugin-for-Java, please
-read our [Developer Certificate of Origin](https://cla.vmware.com/dco). All contributions to this repository must be
+read our [Contributor License Agreement](https://cla.vmware.com/cla/1/preview). All contributions to this repository must be
 signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on
 as an open-source patch.
 
@@ -18,7 +18,7 @@ This is a rough outline of what a contributor's workflow looks like:
 Example:
 
 ``` shell
-git remote add upstream https://github.com/vmware/@(project).git
+git remote add upstream https://github.com/vmware-samples/SonarQube-Plugin-for-Java.git
 git checkout -b my-new-feature main
 git commit -a
 git push origin my-new-feature
@@ -26,7 +26,7 @@ git push origin my-new-feature
 
 ### Staying In Sync With Upstream
 
-When your branch gets out of sync with the vmware/main branch, use the following to update:
+When your branch gets out of sync with the main branch, use the following to update:
 
 ``` shell
 git checkout my-new-feature

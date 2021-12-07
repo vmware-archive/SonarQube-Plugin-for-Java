@@ -1,0 +1,20 @@
+<!--
+    Copyright 2018-2021 VMware, Inc.
+    SPDX-License-Identifier: LGPL-3.0-or-later
+-->
+
+<p><code>String.compareTo()</code> and <code>String.compareToIgnoreCase()</code> compare two strings based on the Unicode value of each character in the strings and not the different ordering they is required for different locales. Results will not linguistically be correct, especially for non-English string comparisons.</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+  String1.compareTo(String2)
+  ...or...
+  String1.compareIgnoreCase(String2)
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+  Locale userPreferredLocale = Locale.forLanguageTag("zh-Hans");
+  ...
+  Collator collatorForCompare = Collator.getInstance(userPreferredLocale);
+  collatorForCompare.compare(String1, String2)
+</pre>

@@ -1,0 +1,17 @@
+<!--
+    Copyright 2018-2021 VMware, Inc.
+    SPDX-License-Identifier: LGPL-3.0-or-later
+-->
+
+<p>The <code>Locale.getDefault()</code> method will often return a value that doesn’t match the user-preferred locale. There should only be a small number of instances that this method is actually acceptable for use as a default -- perhaps once in the entire code base, if that. All other uses will always indicate a risk. This method is prone to more problems due to JVM initialization of locale (along with charset/encoding).</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+  Locale.getDefault()
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+  Locale userPreferredLocale = Locale.forLanguageTag("zh-Hans");
+  ...
+  text.toLowerCase(userPreferredLocale);
+</pre>

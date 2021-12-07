@@ -1,0 +1,17 @@
+<!--
+    Copyright 2018-2021 VMware, Inc.
+    SPDX-License-Identifier: LGPL-3.0-or-later
+-->
+
+<p>Hard-coded (English or non-English) <code>Locale</code> field use should be avoided. Use of these constants could prevent software from running correctly. Always use an explicit, user-preferred locale as an argument for any <code>Locale</code> parameter.</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+  text.toLowerCase(Locale.CHINA);
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+  Locale userPreferredLocale = Locale.forLanguageTag("zh-Hans");
+  ...
+  text.toLowerCase(userPreferredLocale);
+</pre>

@@ -1,0 +1,17 @@
+<!--
+    Copyright 2018-2021 VMware, Inc.
+    SPDX-License-Identifier: LGPL-3.0-or-later
+-->
+
+<p>The <code>Collator</code> class should not be used without an explicit, user-preferred locale argument.</p>
+
+<h2>Noncompliant Code Example</h2>
+<pre>
+  Collator.getInstance()
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+  Locale userPreferredLocale = Locale.forLanguageTag("zh-Hans");
+  ...
+  Collator.getInstance(userPreferredLocale)
+</pre>
