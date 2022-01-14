@@ -4,14 +4,11 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
-import org.sonar.java.matcher.MethodMatcher;
-import org.sonar.java.matcher.TypeCriteria;
-import org.sonar.java.model.ExpressionUtils;
-import org.sonar.plugins.java.api.tree.*;
 
-import java.util.List;
+import org.sonar.java.model.ExpressionUtils;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
+import org.sonar.plugins.java.api.tree.*;
 
 @Rule(key = "V1004")
 public class CharsetInstanceCreationCheck extends AbstractMethodCharsetDetection {
@@ -21,13 +18,13 @@ public class CharsetInstanceCreationCheck extends AbstractMethodCharsetDetection
   private static final String FOR_NAME = "forName";
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
-    TypeCriteria charsetType = TypeCriteria.is(CHARSET);
-
-    return ImmutableList.<MethodMatcher>builder()
-        .add(MethodMatcher.create().typeDefinition(charsetType).name(DEFAULT_CHARSET).withoutParameter())
-        .add(MethodMatcher.create().typeDefinition(charsetType).name(FOR_NAME).addParameter(STRING))
-        .build();
+  protected MethodMatchers getMethodInvocationMatchers() {
+    return MethodMatchers.or(
+        MethodMatchers.create()
+            .ofTypes(CHARSET).names(DEFAULT_CHARSET).addWithoutParametersMatcher().build(),
+        MethodMatchers.create()
+            .ofTypes(CHARSET).names(FOR_NAME).addParametersMatcher(STRING).build()
+    );
   }
 
   @Override

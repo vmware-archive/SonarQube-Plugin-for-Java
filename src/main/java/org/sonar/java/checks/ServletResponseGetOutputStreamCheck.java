@@ -4,13 +4,9 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
-import org.sonar.java.matcher.MethodMatcher;
-import org.sonar.java.matcher.TypeCriteria;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
 import org.sonar.plugins.java.api.tree.*;
-
-import java.util.List;
 
 @Rule(key = "V1007")
 public class ServletResponseGetOutputStreamCheck extends AbstractMethodCharsetDetection {
@@ -21,12 +17,9 @@ public class ServletResponseGetOutputStreamCheck extends AbstractMethodCharsetDe
   private static final String SERVLET_RESPONSE = "javax.servlet.ServletResponse";
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
-    TypeCriteria servletResponseType = TypeCriteria.subtypeOf(SERVLET_RESPONSE);
-
-    return ImmutableList.<MethodMatcher>builder()
-        .add(MethodMatcher.create().typeDefinition(servletResponseType).name(GET_OUTPUT_STREAM).withoutParameter())
-        .build();
+  protected MethodMatchers getMethodInvocationMatchers() {
+    return MethodMatchers.create()
+        .ofTypes(SERVLET_RESPONSE).names(GET_OUTPUT_STREAM).addWithoutParametersMatcher().build();
   }
 
   @Override

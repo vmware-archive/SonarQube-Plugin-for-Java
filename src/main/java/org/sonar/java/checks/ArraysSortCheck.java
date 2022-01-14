@@ -4,27 +4,23 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
 import org.sonar.java.checks.methods.AbstractMethodDetection;
-import org.sonar.java.matcher.MethodMatcher;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
 import org.sonar.plugins.java.api.semantic.Type;
-import org.sonar.plugins.java.api.tree.IdentifierTree;
 import org.sonar.plugins.java.api.tree.MethodInvocationTree;
-import org.sonar.java.matcher.TypeCriteria;
-import org.sonar.plugins.java.api.tree.TypeTree;
-
-import java.util.List;
 
 @Rule(key = "V1017")
 public class ArraysSortCheck extends AbstractMethodDetection {
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
-    return ImmutableList.<MethodMatcher>builder()
-        .add(MethodMatcher.create().typeDefinition("java.util.Arrays").name("sort").addParameter("java.lang.Object[]"))
-        .add(MethodMatcher.create().typeDefinition("java.util.Arrays").name("sort").addParameter("java.lang.Object[]").addParameter("int").addParameter("int"))
-        .build();
+  protected MethodMatchers getMethodInvocationMatchers() {
+    return MethodMatchers.or(
+        MethodMatchers.create()
+            .ofTypes("java.util.Arrays").names("sort").addParametersMatcher("java.lang.Object[]").build(),
+        MethodMatchers.create()
+            .ofTypes("java.util.Arrays").names("sort").addParametersMatcher("java.lang.Object[]", "int", "int").build()
+    );
   }
 
   @Override

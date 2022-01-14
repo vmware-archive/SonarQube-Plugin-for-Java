@@ -4,40 +4,59 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
 import org.sonar.java.checks.methods.AbstractMethodDetection;
-import org.sonar.java.matcher.MethodMatcher;
-import org.sonar.java.matcher.TypeCriteria;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
+import org.sonar.plugins.java.api.semantic.Type;
 import org.sonar.plugins.java.api.tree.MethodInvocationTree;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Rule(key = "V1009")
 public class DateTimeFormatterCheck extends AbstractMethodDetection {
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
+  protected MethodMatchers getMethodInvocationMatchers() {
     final String DATE_TIME_FORMATTER = "java.time.format.DateTimeFormatter";
-    TypeCriteria temporalAccessorSubtype = TypeCriteria.subtypeOf("java.time.temporal.TemporalAccessor");
-    TypeCriteria appendableSubtype = TypeCriteria.subtypeOf("java.lang.Appendable");
+    Predicate<Type> temporalAccessorSubtype = (type) -> {
+      return type.isSubtypeOf("java.time.temporal.TemporalAccessor");
+    };
+    Predicate<Type> appendableSubtype = (type) -> {
+      return type.isSubtypeOf("java.lang.Appendable");
+    };
 
-    return ImmutableList.<MethodMatcher>builder()
-        .add(buildFormatMethodMatcher("java.time.LocalDate"))
-        .add(buildFormatMethodMatcher("java.time.LocalDateTime"))
-        .add(buildFormatMethodMatcher("java.time.LocalTime"))
-        .add(buildFormatMethodMatcher("java.time.MonthDay"))
-        .add(buildFormatMethodMatcher("java.time.OffsetDateTime"))
-        .add(buildFormatMethodMatcher("java.time.OffsetTime"))
-        .add(buildFormatMethodMatcher("java.time.Year"))
-        .add(buildFormatMethodMatcher("java.time.YearMonth"))
-        .add(buildFormatMethodMatcher("java.time.ZonedDateTime"))
-        .add(buildFormatMethodMatcher("java.time.chrono.ChronoLocalDate"))
-        .add(buildFormatMethodMatcher("java.time.chrono.ChronoLocalDateTime"))
-        .add(buildFormatMethodMatcher("java.time.chrono.ChronoZonedDateTime"))
-        .add(MethodMatcher.create().typeDefinition(DATE_TIME_FORMATTER).name("format").addParameter(temporalAccessorSubtype))
-        .add(MethodMatcher.create().typeDefinition(DATE_TIME_FORMATTER).name("formatTo").addParameter(temporalAccessorSubtype).addParameter(appendableSubtype))
-        .build();
+    Predicate<List<Type>> formatParametersType = (parameterTypes) -> {
+      return exactMatchesParameters(Arrays.asList(temporalAccessorSubtype), parameterTypes);
+    };
+
+    Predicate<List<Type>> formatToParametersType = (parameterTypes) -> {
+      return exactMatchesParameters(Arrays.asList(temporalAccessorSubtype, appendableSubtype), parameterTypes);
+    };
+
+    return MethodMatchers.or(
+            buildFormatMethodMatcher("java.time.LocalDate"),
+            buildFormatMethodMatcher("java.time.LocalDateTime"),
+            buildFormatMethodMatcher("java.time.LocalTime"),
+            buildFormatMethodMatcher("java.time.MonthDay"),
+            buildFormatMethodMatcher("java.time.OffsetDateTime"),
+            buildFormatMethodMatcher("java.time.OffsetTime"),
+            buildFormatMethodMatcher("java.time.Year"),
+            buildFormatMethodMatcher("java.time.YearMonth"),
+            buildFormatMethodMatcher("java.time.ZonedDateTime"),
+            buildFormatMethodMatcher("java.time.chrono.ChronoLocalDate"),
+            buildFormatMethodMatcher("java.time.chrono.ChronoLocalDateTime"),
+            buildFormatMethodMatcher("java.time.chrono.ChronoZonedDateTime"),
+            MethodMatchers.create()
+                    .ofTypes(DATE_TIME_FORMATTER)
+                    .names("format")
+                    .addParametersMatcher(formatParametersType).build(),
+            MethodMatchers.create()
+                    .ofTypes(DATE_TIME_FORMATTER)
+                    .names("formatTo")
+                    .addParametersMatcher(formatToParametersType).build()
+    );
   }
 
   @Override
@@ -45,8 +64,8 @@ public class DateTimeFormatterCheck extends AbstractMethodDetection {
       reportIssue(mit, "Use the Unicode ICU DateTimePatternGenerator API instead as it is less error prone.");
   }
 
-  private static MethodMatcher buildFormatMethodMatcher(String type) {
-    return MethodMatcher.create()
-        .typeDefinition(type).name("format").addParameter("java.time.format.DateTimeFormatter");
+  private static MethodMatchers buildFormatMethodMatcher(String type) {
+    return MethodMatchers.create()
+        .ofTypes(type).names("format").addParametersMatcher("java.time.format.DateTimeFormatter").build();
   }
 }

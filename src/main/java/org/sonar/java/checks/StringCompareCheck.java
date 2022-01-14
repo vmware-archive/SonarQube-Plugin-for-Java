@@ -4,24 +4,20 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
 import org.sonar.java.checks.methods.AbstractMethodDetection;
-import org.sonar.java.matcher.MethodMatcher;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
 import org.sonar.plugins.java.api.tree.MethodInvocationTree;
-import org.sonar.java.matcher.TypeCriteria;
-
-import java.util.List;
 
 @Rule(key = "V1015")
 public class StringCompareCheck extends AbstractMethodDetection {
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
-    return ImmutableList.<MethodMatcher>builder()
-        .add(buildFormatMethodMatcher("compareTo"))
-        .add(buildFormatMethodMatcher("compareToIgnoreCase"))
-        .build();
+  protected MethodMatchers getMethodInvocationMatchers() {
+    return MethodMatchers.or(
+        buildFormatMethodMatcher("compareTo"),
+        buildFormatMethodMatcher("compareToIgnoreCase")
+    );
   }
 
   @Override
@@ -29,8 +25,8 @@ public class StringCompareCheck extends AbstractMethodDetection {
     reportIssue(mit, "String.compareTo() and String.compareToIgnoreCase() fail to compare non-English text correctly. Use Java Collator instead.");
   }
 
-  private static MethodMatcher buildFormatMethodMatcher(String method) {
-    return MethodMatcher.create()
-        .callSite(TypeCriteria.is("java.lang.String")).name(method).withAnyParameters();
+  private static MethodMatchers buildFormatMethodMatcher(String method) {
+    return MethodMatchers.create()
+        .ofTypes("java.lang.String").names(method).withAnyParameters().build();
   }
 }

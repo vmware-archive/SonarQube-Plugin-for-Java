@@ -11,8 +11,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.rule.RuleStatus;
@@ -21,9 +20,6 @@ import org.sonar.api.server.debt.DebtRemediationFunction;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
-import org.sonar.check.Cardinality;
-import org.sonar.plugins.java.Java;
-import org.sonar.squidbridge.annotations.RuleTemplate;
 
 /**
  * Declare rule metadata in server repository of rules. 
@@ -36,12 +32,15 @@ public class JavaRulesDefinition implements RulesDefinition {
 
   public static final String REPOSITORY_KEY = "i18n-java";
 
+  // Add the rule keys of the rules which need to be considered as template-rules
+  private static final Set<String> RULE_TEMPLATES_KEY = Collections.emptySet();
+
   private final Gson gson = new Gson();
 
   @Override
   public void define(Context context) {
     NewRepository repository = context
-      .createRepository(REPOSITORY_KEY, Java.KEY)
+      .createRepository(REPOSITORY_KEY, "java")
       .setName("I18n Issues Analyzer Repository");
 
     List<Class> checks = RulesList.getChecks();
@@ -70,10 +69,11 @@ public class JavaRulesDefinition implements RulesDefinition {
     }
     ruleMetadata(rule);
 
-    rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
-    if (ruleAnnotation.cardinality() == Cardinality.MULTIPLE) {
-      throw new IllegalArgumentException("Cardinality is not supported, use the RuleTemplate annotation instead for " + ruleClass);
-    }
+    setTemplates(repository);
+//    rule.setTemplate(AnnotationUtils.getAnnotation(ruleClass, RuleTemplate.class) != null);
+//    if (ruleAnnotation.cardinality() == Cardinality.MULTIPLE) {
+//      throw new IllegalArgumentException("Cardinality is not supported, use the RuleTemplate annotation instead for " + ruleClass);
+//    }
   }
 
   private void ruleMetadata(NewRule rule) {
@@ -142,4 +142,10 @@ public class JavaRulesDefinition implements RulesDefinition {
     }
   }
 
+  private static void setTemplates(NewRepository repository) {
+    RULE_TEMPLATES_KEY.stream()
+        .map(repository::rule)
+        .filter(Objects::nonNull)
+        .forEach(rule -> rule.setTemplate(true));
+  }
 }

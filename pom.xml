@@ -14,21 +14,28 @@
 
 	<name>SonarQube Java I18n Rules</name>
 	<description>Java I18n Rules for SonarQube</description>
-	<inceptionYear>2019</inceptionYear>
 
 	<properties>
-		<sslr.version>1.21</sslr.version>
+		<sonarqube.version>8.9.0.43852</sonarqube.version>
+		<sonarjava.version>6.15.1.26025</sonarjava.version>
+		<!-- Don't forget to update this version of JaCoCo -->
+		<jacoco.version>0.8.7</jacoco.version>
+		<!-- Use UTF-8 for all resources -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Make sure to be compatible with java 8 -->
+		<maven.compiler.release>8</maven.compiler.release>
+
+		<!-- sslr.version>1.21</sslr.version -->
 		<gson.version>2.6.2</gson.version>
 
-		<sonar.version>7.3</sonar.version>
-		<sonarjava.version>5.6.1.15064</sonarjava.version>
+		<!-- sonar.version>7.3</sonar.version -->
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.sonarsource.sonarqube</groupId>
 			<artifactId>sonar-plugin-api</artifactId>
-			<version>${sonar.version}</version>
+			<version>${sonarqube.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -37,10 +44,51 @@
 			<artifactId>sonar-java-plugin</artifactId>
 			<type>sonar-plugin</type>
 			<version>${sonarjava.version}</version>
-			<!-- scope>provided</scope -->
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
+			<groupId>org.sonarsource.analyzer-commons</groupId>
+			<artifactId>sonar-analyzer-commons</artifactId>
+			<version>1.14.1.690</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.sonarsource.java</groupId>
+			<artifactId>java-checks-testkit</artifactId>
+			<version>${sonarjava.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.sonarsource.java</groupId>
+			<artifactId>java-frontend</artifactId>
+			<version>${sonarjava.version}</version>
+			<!-- scope>provided</scope -->
+		</dependency>
+
+		<!-- dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.7.0</version>
+			<scope>test</scope>
+		</dependency -->
+
+		<!-- dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-migrationsupport</artifactId>
+			<version>5.7.0</version>
+			<scope>test</scope>
+		</dependency -->
+
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.19.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- dependency>
 			<groupId>org.sonarsource.sslr-squid-bridge</groupId>
 			<artifactId>sslr-squid-bridge</artifactId>
 			<version>2.6.1</version>
@@ -66,14 +114,7 @@
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.sonarsource.java</groupId>
-			<artifactId>java-checks-testkit</artifactId>
-			<version>${sonarjava.version}</version>
-			<scope>test</scope>
-		</dependency>
+		</dependency -->
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -81,12 +122,12 @@
 			<version>${gson.version}</version>
 		</dependency>
 
-		<dependency>
+		<!-- dependency>
 			<groupId>org.sonarsource.sslr</groupId>
 			<artifactId>sslr-testing-harness</artifactId>
 			<version>${sslr.version}</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency -->
 
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -101,23 +142,36 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<!--dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.6.2</version>
-		</dependency>
+		</dependency -->
 
-		<dependency>
+		<!-- dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.1</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<version>3.6.1</version>
-			<scope>test</scope>
-		</dependency>
+		</dependency -->
+
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
@@ -131,31 +185,54 @@
 			<plugin>
 				<groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
 				<artifactId>sonar-packaging-maven-plugin</artifactId>
-				<version>1.17</version>
+				<version>1.20.0.405</version>
 				<extensions>true</extensions>
 				<configuration>
 					<pluginKey>javai18n</pluginKey>
 					<pluginName>Java I18n Rules</pluginName>
 					<pluginClass>org.sonar.java.JavaRulesPlugin</pluginClass>
 					<sonarLintSupported>true</sonarLintSupported>
-					<sonarQubeMinVersion>6.7</sonarQubeMinVersion>
+					<!-- FIXME: https://jira.sonarsource.com/browse/SLCORE-315 -->
+					<!-- SonarLint currently supports only up to SQ 8.5, instead of 8.9 LTS -->
+					<sonarQubeMinVersion>7.9</sonarQubeMinVersion>
+					<requirePlugins>java:${sonarjava.version}</requirePlugins>
 				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.6.0</version>
+				<version>3.8.0</version>
 				<configuration>
-					<release>8</release>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<!-- only required to run UT - these are UT dependencies -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
 				<executions>
 					<execution>
 						<id>copy</id>
@@ -166,6 +243,12 @@
 						<configuration>
 							<artifactItems>
 								<artifactItem>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-api</artifactId>
+									<version>1.7.30</version>
+									<type>jar</type>
+								</artifactItem>
+								<artifactItem>
 									<groupId>org.apache.commons</groupId>
 									<artifactId>commons-collections4</artifactId>
 									<version>4.0</version>
@@ -175,32 +258,41 @@
 									<groupId>javax</groupId>
 									<artifactId>javaee-api</artifactId>
 									<version>6.0</version>
+									<type>jar</type>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.springframework</groupId>
 									<artifactId>spring-webmvc</artifactId>
 									<version>4.3.3.RELEASE</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.springframework</groupId>
-									<artifactId>spring-webmvc</artifactId>
-									<version>4.3.3.RELEASE</version>
+									<type>jar</type>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.springframework</groupId>
 									<artifactId>spring-web</artifactId>
 									<version>4.3.3.RELEASE</version>
+									<type>jar</type>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.springframework</groupId>
 									<artifactId>spring-context</artifactId>
 									<version>4.3.3.RELEASE</version>
+									<type>jar</type>
+								</artifactItem>
+								<artifactItem>
+									<groupId>junit</groupId>
+									<artifactId>junit</artifactId>
+									<version>4.13.2</version>
+									<type>jar</type>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.build.directory}/test-jars</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.2</version>
 			</plugin>
 		</plugins>
 	</build>

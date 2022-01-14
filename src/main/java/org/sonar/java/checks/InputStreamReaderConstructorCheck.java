@@ -4,13 +4,14 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
-import org.sonar.java.matcher.MethodMatcher;
-import org.sonar.java.matcher.TypeCriteria;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
+import org.sonar.plugins.java.api.semantic.Type;
 import org.sonar.plugins.java.api.tree.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Rule(key = "V1005")
 public class InputStreamReaderConstructorCheck extends AbstractMethodCharsetDetection {
@@ -21,14 +22,43 @@ public class InputStreamReaderConstructorCheck extends AbstractMethodCharsetDete
   private static final String INIT = "<init>";
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
-    TypeCriteria inputStreamSubtype = TypeCriteria.subtypeOf(INPUT_STREAM);
+  protected MethodMatchers getMethodInvocationMatchers() {
+    Predicate<Type> inputStreamSubtype = (type) -> {
+      return type.isSubtypeOf(INPUT_STREAM);
+    };
+    Predicate<Type> charsetType = (type) -> {
+      return type.is(CHARSET);
+    };
+    Predicate<Type> stringType = (type) -> {
+      return type.is(STRING);
+    };
 
-    return ImmutableList.<MethodMatcher>builder()
-        .add(MethodMatcher.create().typeDefinition(INPUT_STREAM_READER).name(INIT).addParameter(inputStreamSubtype))
-        .add(MethodMatcher.create().typeDefinition(INPUT_STREAM_READER).name(INIT).addParameter(inputStreamSubtype).addParameter(CHARSET))
-        .add(MethodMatcher.create().typeDefinition(INPUT_STREAM_READER).name(INIT).addParameter(inputStreamSubtype).addParameter(STRING))
-        .build();
+    Predicate<List<Type>> oneParametersType = (parameterTypes) -> {
+      return exactMatchesParameters(Arrays.asList(inputStreamSubtype), parameterTypes);
+    };
+
+    Predicate<List<Type>> twoParametersWithCharsetType = (parameterTypes) -> {
+      return exactMatchesParameters(Arrays.asList(inputStreamSubtype, charsetType), parameterTypes);
+    };
+
+    Predicate<List<Type>> twoParametersWithStringType = (parameterTypes) -> {
+      return exactMatchesParameters(Arrays.asList(inputStreamSubtype, stringType), parameterTypes);
+    };
+
+    return MethodMatchers.or(
+            MethodMatchers.create()
+                    .ofTypes(INPUT_STREAM_READER)
+                    .constructor()
+                    .addParametersMatcher(oneParametersType).build(),
+            MethodMatchers.create()
+                    .ofTypes(INPUT_STREAM_READER)
+                    .constructor()
+                    .addParametersMatcher(twoParametersWithCharsetType).build(),
+            MethodMatchers.create()
+                    .ofTypes(INPUT_STREAM_READER)
+                    .constructor()
+                    .addParametersMatcher(twoParametersWithStringType).build()
+    );
   }
 
   @Override

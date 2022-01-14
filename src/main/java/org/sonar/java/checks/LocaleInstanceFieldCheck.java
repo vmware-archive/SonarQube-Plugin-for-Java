@@ -27,7 +27,7 @@ public class LocaleInstanceFieldCheck extends IssuableSubscriptionVisitor {
 
   @Override
   public void visitNode(Tree tree) {
-    if (hasSemantic()) {
+
       Symbol identifierSymbol = ((IdentifierTree)tree).symbol();
       if (identifierSymbol.isUnknown() || (identifierSymbol.owner() == null) || (identifierSymbol.owner().type() == null)) {
         return;
@@ -36,7 +36,6 @@ public class LocaleInstanceFieldCheck extends IssuableSubscriptionVisitor {
       if (ownerType.is(LOCALE) && getCheckedLocales().contains(identifierSymbol.name())) {
         context.reportIssue(this, tree, "Use explicit, user-preferred Locale settings to insure an ideal international user experience.");
       }
-    }
   }
 
   private static List<String> getCheckedLocales() {

@@ -4,13 +4,9 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
-import org.sonar.java.matcher.MethodMatcher;
-import org.sonar.java.matcher.TypeCriteria;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
 import org.sonar.plugins.java.api.tree.*;
-
-import java.util.List;
 
 @Rule(key = "V1003")
 public class StringConstructorCheck extends AbstractMethodCharsetDetection {
@@ -21,19 +17,25 @@ public class StringConstructorCheck extends AbstractMethodCharsetDetection {
   private static final String INT = "int";
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
-    TypeCriteria typeString = TypeCriteria.is(STRING);
-
-    return ImmutableList.<MethodMatcher>builder()
-        .add(MethodMatcher.create().typeDefinition(typeString).name(INIT).addParameter(BYTE_ARRAY))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(INIT).addParameter(BYTE_ARRAY).addParameter(CHARSET))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(INIT).addParameter(BYTE_ARRAY).addParameter(STRING))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(INIT).addParameter(BYTE_ARRAY).addParameter(INT).addParameter(INT))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(INIT).addParameter(BYTE_ARRAY).addParameter(INT).addParameter(INT).addParameter(CHARSET))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(INIT).addParameter(BYTE_ARRAY).addParameter(INT).addParameter(INT).addParameter(STRING))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(INIT).addParameter(BYTE_ARRAY).addParameter(INT))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(INIT).addParameter(BYTE_ARRAY).addParameter(INT).addParameter(INT).addParameter(INT))
-        .build();
+  protected MethodMatchers getMethodInvocationMatchers() {
+    return MethodMatchers.or(
+        MethodMatchers.create()
+            .ofTypes(STRING).constructor().addParametersMatcher(BYTE_ARRAY).build(),
+        MethodMatchers.create()
+            .ofTypes(STRING).constructor().addParametersMatcher(BYTE_ARRAY, CHARSET).build(),
+        MethodMatchers.create()
+            .ofTypes(STRING).constructor().addParametersMatcher(BYTE_ARRAY, STRING).build(),
+        MethodMatchers.create()
+            .ofTypes(STRING).constructor().addParametersMatcher(BYTE_ARRAY, INT, INT).build(),
+        MethodMatchers.create()
+            .ofTypes(STRING).constructor().addParametersMatcher(BYTE_ARRAY, INT, INT, CHARSET).build(),
+        MethodMatchers.create()
+            .ofTypes(STRING).constructor().addParametersMatcher(BYTE_ARRAY, INT, INT, STRING).build(),
+        MethodMatchers.create()
+            .ofTypes(STRING).constructor().addParametersMatcher(BYTE_ARRAY, INT).build(),
+        MethodMatchers.create()
+            .ofTypes(STRING).constructor().addParametersMatcher(BYTE_ARRAY, INT, INT, INT).build()
+    );
   }
 
   @Override

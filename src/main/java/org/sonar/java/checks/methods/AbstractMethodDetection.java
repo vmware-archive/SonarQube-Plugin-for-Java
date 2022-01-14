@@ -1,83 +1,96 @@
 /*
- * Copyright 2018-2021 VMware, Inc.
- * SPDX-License-Identifier: LGPL-3.0-or-later
+ * SonarQube Java
+ * Copyright (C) 2012-2021 SonarSource SA
+ * mailto:info AT sonarsource DOT com
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 package org.sonar.java.checks.methods;
 
-import com.google.common.collect.ImmutableList;
-import org.sonar.java.matcher.MethodMatcher;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+
 import org.sonar.plugins.java.api.IssuableSubscriptionVisitor;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
+import org.sonar.plugins.java.api.semantic.Type;
 import org.sonar.plugins.java.api.tree.MethodInvocationTree;
+import org.sonar.plugins.java.api.tree.MethodReferenceTree;
 import org.sonar.plugins.java.api.tree.NewClassTree;
 import org.sonar.plugins.java.api.tree.Tree;
 
-import java.util.List;
-
 public abstract class AbstractMethodDetection extends IssuableSubscriptionVisitor {
 
-  private List<MethodMatcher> matchers;
+    private MethodMatchers matchers;
 
-  @Override
-  public List<Tree.Kind> nodesToVisit() {
-    return ImmutableList.of(Tree.Kind.METHOD_INVOCATION, Tree.Kind.NEW_CLASS);
-  }
-
-  @Override
-  public void visitNode(Tree tree) {
-    if (hasSemantic()) {
-      for (MethodMatcher invocationMatcher : matchers()) {
-        checkInvocation(tree, invocationMatcher);
-      }
+    @Override
+    public List<Tree.Kind> nodesToVisit() {
+        return Arrays.asList(Tree.Kind.METHOD_INVOCATION, Tree.Kind.NEW_CLASS, Tree.Kind.METHOD_REFERENCE);
     }
-  }
 
-  // vmw begin
-  public MethodMatcher getMatchedMatcher(Tree tree) {
-    for (MethodMatcher invocationMatcher : matchers()) {
-      if (tree.is(Tree.Kind.METHOD_INVOCATION)) {
-        MethodInvocationTree mit = (MethodInvocationTree) tree;
-        if (invocationMatcher.matches(mit)) {
-          return invocationMatcher;
+    @Override
+    public void visitNode(Tree tree) {
+        if (tree.is(Tree.Kind.METHOD_INVOCATION)) {
+            MethodInvocationTree mit = (MethodInvocationTree) tree;
+            if (matchers().matches(mit)) {
+                onMethodInvocationFound(mit);
+            }
+        } else if (tree.is(Tree.Kind.NEW_CLASS)) {
+            NewClassTree newClassTree = (NewClassTree) tree;
+            if (matchers().matches(newClassTree)) {
+                onConstructorFound(newClassTree);
+            }
+        } else if (tree.is(Tree.Kind.METHOD_REFERENCE)) {
+            MethodReferenceTree methodReferenceTree = (MethodReferenceTree) tree;
+            if (matchers().matches(methodReferenceTree)) {
+                onMethodReferenceFound(methodReferenceTree);
+            }
         }
-      } else if (tree.is(Tree.Kind.NEW_CLASS)) {
-        NewClassTree newClassTree = (NewClassTree) tree;
-        if (invocationMatcher.matches(newClassTree)) {
-          return invocationMatcher;
+    }
+
+    protected abstract MethodMatchers getMethodInvocationMatchers();
+
+    protected void onMethodInvocationFound(MethodInvocationTree mit) {
+        // Do nothing by default
+    }
+
+    protected void onConstructorFound(NewClassTree newClassTree) {
+        // Do nothing by default
+    }
+
+    protected void onMethodReferenceFound(MethodReferenceTree methodReferenceTree) {
+        // Do nothing by default
+    }
+
+    private MethodMatchers matchers() {
+        if (matchers == null) {
+            matchers = getMethodInvocationMatchers();
         }
-      }
+        return matchers;
     }
-    return null;
-  }
-  // vmw end
 
-  private void checkInvocation(Tree tree, MethodMatcher invocationMatcher) {
-    if (tree.is(Tree.Kind.METHOD_INVOCATION)) {
-      MethodInvocationTree mit = (MethodInvocationTree) tree;
-      if (invocationMatcher.matches(mit)) {
-        onMethodInvocationFound(mit);
-      }
-    } else if (tree.is(Tree.Kind.NEW_CLASS)) {
-      NewClassTree newClassTree = (NewClassTree) tree;
-      if (invocationMatcher.matches(newClassTree)) {
-        onConstructorFound(newClassTree);
-      }
+    protected static boolean exactMatchesParameters(List<Predicate<Type>> expectedTypes, List<Type> actualTypes) {
+        return actualTypes.size() == expectedTypes.size() && matchesParameters(expectedTypes, actualTypes);
     }
-  }
 
-  protected abstract List<MethodMatcher> getMethodInvocationMatchers();
-
-  protected void onMethodInvocationFound(MethodInvocationTree mit) {
-    // Do nothing by default
-  }
-
-  protected void onConstructorFound(NewClassTree newClassTree) {
-    // Do nothing by default
-  }
-
-  private List<MethodMatcher> matchers() {
-    if (matchers == null) {
-      matchers = getMethodInvocationMatchers();
+    protected static boolean matchesParameters(List<Predicate<Type>> expectedTypes, List<Type> actualTypes) {
+        for(int i = 0; i < expectedTypes.size(); ++i) {
+            if (!((Predicate)expectedTypes.get(i)).test((Type)actualTypes.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
-    return matchers;
-  }
 }

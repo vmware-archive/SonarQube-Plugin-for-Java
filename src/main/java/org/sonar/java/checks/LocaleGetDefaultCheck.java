@@ -4,23 +4,18 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
 import org.sonar.java.checks.methods.AbstractMethodDetection;
-import org.sonar.java.matcher.MethodMatcher;
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
 import org.sonar.plugins.java.api.tree.MethodInvocationTree;
-import org.sonar.java.matcher.TypeCriteria;
-
-import java.util.List;
 
 @Rule(key = "V1020")
 public class LocaleGetDefaultCheck extends AbstractMethodDetection {
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
-    return ImmutableList.<MethodMatcher>builder()
-        .add(MethodMatcher.create().typeDefinition("java.util.Locale").name("getDefault").withAnyParameters())
-        .build();
+  protected MethodMatchers getMethodInvocationMatchers() {
+    return MethodMatchers.create()
+            .ofTypes("java.util.Locale").names("getDefault").withAnyParameters().build();
   }
 
   @Override

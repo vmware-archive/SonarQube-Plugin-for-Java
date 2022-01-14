@@ -4,35 +4,25 @@
  */
 package org.sonar.java.checks;
 
-import com.google.common.collect.ImmutableList;
 import org.sonar.check.Rule;
-import org.sonar.java.checks.methods.AbstractMethodDetection;
-import org.sonar.java.matcher.MethodMatcher;
-import org.sonar.java.matcher.NameCriteria;
-import org.sonar.java.matcher.TypeCriteria;
-import org.sonar.java.model.LiteralUtils;
-import org.sonar.plugins.java.api.semantic.Symbol;
-import org.sonar.plugins.java.api.semantic.Type;
-
-import java.util.List;
-
+import org.sonar.plugins.java.api.semantic.MethodMatchers;
 import org.sonar.plugins.java.api.tree.*;
 
 @Rule(key = "V1002")
 public class StringGetBytesCheck extends AbstractMethodCharsetDetection {
 
   @Override
-  protected List<MethodMatcher> getMethodInvocationMatchers() {
-    TypeCriteria typeString = TypeCriteria.is("java.lang.String");
-    NameCriteria methodGetBytes = NameCriteria.is("getBytes");
-
-    return ImmutableList.<MethodMatcher>builder()
-        .add(MethodMatcher.create().typeDefinition(typeString).name(methodGetBytes).withoutParameter())
-        .add(MethodMatcher.create().typeDefinition(typeString).name(methodGetBytes).addParameter("java.nio.charset.Charset"))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(methodGetBytes).addParameter("int")
-            .addParameter("int").addParameter("byte[]").addParameter("int"))
-        .add(MethodMatcher.create().typeDefinition(typeString).name(methodGetBytes).addParameter("java.lang.String"))
-        .build();
+  protected MethodMatchers getMethodInvocationMatchers() {
+    return MethodMatchers.or(
+        MethodMatchers.create()
+            .ofTypes("java.lang.String").names("getBytes").addWithoutParametersMatcher().build(),
+        MethodMatchers.create()
+            .ofTypes("java.lang.String").names("getBytes").addParametersMatcher("java.nio.charset.Charset").build(),
+        MethodMatchers.create()
+            .ofTypes("java.lang.String").names("getBytes").addParametersMatcher("int", "int", "byte[]", "int").build(),
+        MethodMatchers.create()
+            .ofTypes("java.lang.String").names("getBytes").addParametersMatcher("java.lang.String").build()
+    );
   }
 
   @Override
